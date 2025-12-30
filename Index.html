@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DON'T TURN AROUND</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        touch-action: manipulation;
+    }
+    canvas {
+        display: block;
+    }
+    #text {
+        position: absolute;
+        top: 15px;
+        width: 100%;
+        text-align: center;
+        color: red;
+        font-family: monospace;
+        letter-spacing: 2px;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+</style>
+</head>
+<body>
+<div id="text">DON'T STOP MOVING</div>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let player = { x: canvas.width/2, y: canvas.height/2 };
+let monster = { x: Math.random()*canvas.width, y: Math.random()*canvas.height };
+let speed = 1.2;
+let alive = true;
+
+canvas.addEventListener("touchstart", () => {
+    player.x += (Math.random()-0.5)*200;
+    player.y += (Math.random()-0.5)*200;
+});
+
+function drawDarkness() {
+    ctx.fillStyle = "rgba(0,0,0,0.9)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    let g = ctx.createRadialGradient(player.x, player.y, 20, player.x, player.y, 120);
+    g.addColorStop(0,"transparent");
+    g.addColorStop(1,"black");
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation = "source-over";
+}
+
+function update() {
+    if (!alive) return;
+    monster.x += (player.x - monster.x) * 0.002;
+    monster.y += (player.y - monster.y) * 0.002;
+
+    let dx = player.x - monster.x;
+    let dy = player.y - monster.y;
+    let dist = Math.hypot(dx, dy);
+    if (dist < 30) {
+        alive = false;
+        document.getElementById("text").innerText = "IT GOT YOU";
+    }
+}
+
+function loop() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "darkred";
+    ctx.beginPath();
+    ctx.arc(monster.x, monster.y, 12, 0, Math.PI*2);
+    ctx.fill();
+    drawDarkness();
+    update();
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
